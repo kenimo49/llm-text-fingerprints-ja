@@ -17,6 +17,7 @@
 \usepackage{CJKutf8}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, positioning}
+\setlength{\belowcaptionskip}{6pt}
 
 \bibliographystyle{plainnat}
 
@@ -106,7 +107,7 @@ We compute 13 interpretable rhythm metrics per document. Markdown is preprocesse
 
 \begin{itemize}
     \item \textbf{Sentence length (characters)}: mean, SD, and coefficient of variation (CV) of sentence lengths in characters.
-    \item \textbf{Sentence length (moras)}: the same three statistics on approximated mora counts. Moras are approximated from the UniDic pronunciation field (katakana): small kana (ャュョァィゥェォヮ) merge into the preceding mora; ー, ッ, and ン each count as one mora; tokens without a reading (e.g., ASCII identifiers) contribute zero moras.
+    \item \sloppy \textbf{Sentence length (moras)}: the same three statistics on approximated mora counts. Moras are approximated from the UniDic pronunciation field (katakana): small kana (ャュョァィゥェォヮ) merge into the preceding mora; ー, ッ, and ン each count as one mora; tokens without a reading (e.g., ASCII identifiers) contribute zero moras.
     \item \textbf{Burstiness} of the sentence-length sequence, $B = (\sigma - \mu)/(\sigma + \mu)$ with population SD~\citep{goh2008burstiness}, computed for character lengths and mora lengths. $B$ approaches $-1$ for regular (monotone) sequences and grows with bursty variation; the application to sentence-length sequences follows \texttt{natural-japanese}.
     \item \textbf{Paragraph sentence-count CV}: variation in the number of sentences per paragraph.
     \item \textbf{Noun-ending rate} (体言止め): fraction of prose sentences (list items excluded) whose final content morpheme is a noun.
@@ -171,10 +172,11 @@ The failure mode of the token-based test is concrete. The prior study's top-rank
 \centering
 \caption{Top 10 excess words by frequency ratio $r$ and by frequency gap $\delta$ (FDR-significant, excess direction, document-occurrence statistics with Laplace smoothing). The bracketed 95\% CI accompanies the ranking index of each block: $r$ in the top block, $\delta$ in the bottom block. Doc counts are raw (AI /350, human /700); $r$ and $\delta$ use smoothed frequencies. Daggers ($\dagger$) mark ASCII fragments arising from MeCab segmentation of English spans embedded in Japanese text (see Limitations). Full statistics for all 1{,}684 words: \texttt{results/lexical/word\_stats.csv}.}
 \label{tab:topwords}
-\small
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{llrrrr}
 \toprule
- & Word & $r$ & $\delta$ & AI / Human docs & $q_{\text{FDR}}$ \\
+ & Word & $r$ & $\delta$ & AI/H docs & $q_{\text{FDR}}$ \\
 \midrule
 \multirow{10}{*}{by $r$}
  & NF$^\dagger$ & 21.97 [8.99, 59.91] & 0.060 & 21 / 1 & $1.6\times10^{-8}$ \\
@@ -214,7 +216,8 @@ Table~\ref{tab:rhythm} reports the 13 rhythm metrics. The four largest human--AI
 \centering
 \caption{Rhythm metrics, human (n=696) vs.\ AI (n=350), document level. $d$ = Cohen's $d$ (positive = AI higher) with bootstrap 95\% CI; MW $p$ = Mann--Whitney $U$ two-sided with Holm correction (secondary; rank tests are sensitive to shape differences at small $d$). The prior sentence-ending bigram TTR is replaced by MATTR (last row; see text).}
 \label{tab:rhythm}
-\small
+\footnotesize
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lrrrr}
 \toprule
 Metric & Human mean$\pm$SD & AI mean$\pm$SD & $d$ [95\% CI] & MW $p$ (Holm) \\
@@ -251,7 +254,8 @@ Table~\ref{tab:auc} reports human/AI classification AUCs. Lexical features reach
 \centering
 \caption{Human/AI discrimination AUC (mean $\pm$ SD over 100 folds; brackets: bootstrap 95\% CI, $B=10{,}000$). \texttt{main}: all 1{,}046 documents. \texttt{lenadj}: all features residualized against document-length covariates. \texttt{sens\_degen}: 6 degenerate Llama documents removed. \texttt{sens\_nollama}: all 50 Llama documents removed.}
 \label{tab:auc}
-\small
+\footnotesize
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lccc}
 \toprule
 Condition & Lexical & Rhythm & Combined \\
@@ -412,6 +416,7 @@ This study's lexical layer began as an audit of our prior work, and the audit fo
 We compared lexical and rhythmic fingerprints of Japanese LLM-generated text across 7 models under a controlled design, after rebuilding the lexical statistics on a document-occurrence basis. Three results stand. First, the document-based re-analysis corrects our prior study: 35\% of its 651 reported excess words---half of the AI-excess side---were artifacts of token-level pseudoreplication, and the corrected Japanese excess vocabulary reproduces the $r$/$\delta$ complementarity established for English. Second, rhythmic monotonization is a genuine, model-universal property of Japanese AI text (burstiness $d=-0.96$; direction shared by all 7 models), yet lexical features dominate human/AI discrimination (AUC 0.998 vs.\ 0.897; gap robust to length control and outlier exclusion), the opposite of the practitioner claim that motivated the comparison, whose descriptive core our rhythm measurements still confirm. Third, the two families form a two-layer fingerprint: rhythm shifts in a shared direction with model-dependent magnitude, while the lexical profile (and, descriptively, sentence-ending rhetoric) identifies the generating model at 92\% accuracy. Vocabulary tells you which model wrote a text; rhythm tells you that a model wrote it. Beneath both findings sits a third: document-level statistics substantially revise previously reported estimates of excess vocabulary in Japanese LLM-generated text. This correction also illustrates a broader methodological point: excess-vocabulary studies should use documents, not tokens, as the statistical unit.
 
 \paragraph{Data Availability.}
+\sloppy
 All analysis code, per-word statistics (1{,}684 words), rhythm measurements (1{,}046 documents), and classification results are available at \url{https://github.com/kenimo49/llm-text-fingerprints-ja} under the MIT License. This paper and the accompanying data archive are preserved on Zenodo at \url{https://doi.org/10.5281/zenodo.21413036}.
 The underlying corpora are those of \citet{imoto2026excess} (\url{https://github.com/kenimo49/excess-vocabulary-ja}), used read-only at commit \texttt{fdb24f4c}.
 
