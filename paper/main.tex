@@ -15,6 +15,8 @@
 \usepackage{array}
 \usepackage{tabularx}
 \usepackage{CJKutf8}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning}
 
 \bibliographystyle{plainnat}
 
@@ -28,7 +30,7 @@
 \maketitle
 
 \begin{abstract}
-Which feature family carries the human/AI signal in Japanese LLM-generated text: word choice or rhythm? Practitioner tools claim that the ``AI smell'' of Japanese text resides in rhythm (monotone sentence-length variation) rather than vocabulary, but this claim has not been tested against lexical features under a controlled design. We compare lexical and rhythmic fingerprints on a corpus of 350 texts from 7 LLMs (Claude 3 Haiku, Claude Sonnet 4, Claude Opus 4, GPT-3.5 Turbo, GPT-4o, GPT-OSS 20B, Llama 3.2 1B) against 700 human technical-blog articles. We first rebuild the excess-vocabulary statistics of our prior study on a document-occurrence basis (Laplace smoothing, frequency ratio $r$ and gap $\delta$, document-level $\chi^2$ tests with BH-FDR correction, bootstrap confidence intervals), following Kobak et al.\ (2025). The re-analysis is also a correction: 35\% of the 651 words we previously reported as significant do not survive at the document level, an artifact of token-level tests treating within-document repetition as independent evidence. We then measure 13 interpretable rhythm metrics, including burstiness of sentence-length sequences and a mora-based approximation of phonological rhythm. Three findings emerge. (1)~Rhythmic monotonization is real and shared: AI text shows lower burstiness (Cohen's $d=-0.96$), lower paragraph-structure variation ($d=-0.67$), and lower sentence-length variation ($d=-0.56$), with the same direction in all 7 models. (2)~Contrary to the practitioner claim, lexical features dominate human/AI discrimination: cross-validated AUC is 0.998 for lexical vs.\ 0.897 for rhythm features (paired difference $-0.101$, 95\% CI $[-0.105, -0.097]$), and the gap persists under document-length residualization and outlier-model exclusion. (3)~At the multivariate level, the two families form a two-layer fingerprint: lexical profiles identify \emph{which} model wrote a text (92\% accuracy in 7-way model identification vs.\ 51\% for rhythm), whereas rhythm features shift in a direction common to all models, with model-dependent magnitude. Rhythm forms the shared accent of machine writing; vocabulary is the signature of the individual model.
+Which feature family carries the human/AI signal in Japanese LLM-generated text: word choice or rhythm? Practitioner tools claim that the ``AI smell'' of Japanese text resides in rhythm (monotone sentence-length variation) rather than vocabulary, but this claim has not been tested against lexical features under a controlled design. We compare lexical and rhythmic fingerprints on a corpus of 350 texts from 7 LLMs (Claude 3 Haiku, Claude Sonnet 4, Claude Opus 4, GPT-3.5 Turbo, GPT-4o, GPT-OSS 20B, Llama 3.2 1B) against 700 human technical-blog articles. We first rebuild the excess-vocabulary statistics of our prior study on a document-occurrence basis (Laplace smoothing, frequency ratio $r$ and gap $\delta$, document-level $\chi^2$ tests with BH-FDR correction, bootstrap confidence intervals), following Kobak et al.\ (2025). The re-analysis is also a correction: 35\% of the 651 words we previously reported as significant do not survive at the document level, an artifact of treating repeated tokens within a document as independent evidence. We then measure 13 interpretable rhythm metrics, including burstiness of sentence-length sequences and a mora-based approximation of phonological rhythm. Three findings emerge. (1)~Rhythmic monotonization is real and shared: AI text shows lower burstiness (Cohen's $d=-0.96$), lower paragraph-structure variation ($d=-0.67$), and lower sentence-length variation ($d=-0.56$), with the same direction in all 7 models. (2)~Contrary to the practitioner claim, lexical features dominate human/AI discrimination: cross-validated AUC is 0.998 for lexical vs.\ 0.897 for rhythm features (paired difference $-0.101$, 95\% CI $[-0.105, -0.097]$), and the gap persists under document-length residualization and outlier-model exclusion. (3)~At the multivariate level, the two families form a two-layer fingerprint: lexical profiles identify \emph{which} model wrote a text (92\% accuracy in 7-way model identification vs.\ 51\% for rhythm), whereas rhythm features shift in a direction common to all models, with model-dependent magnitude. Rhythm forms the shared accent of machine writing; vocabulary is the signature of the individual model.
 \end{abstract}
 
 \section{Introduction}
@@ -343,7 +345,36 @@ The picture reverses when features act together. Lexical profiles identify the g
 
 \subsection{A Two-Layer Fingerprint Structure}
 
-The results organize into two layers. \textbf{Layer 1 (shared machine accent)}: rhythmic monotonization (suppressed burstiness, uniform paragraph structure, compressed sentence-length variation) points the same way in all 7 models and supports human/AI discrimination at AUC $\approx 0.90$ with 13 interpretable features. \textbf{Layer 2 (model signature)}: the lexical profile, which identifies the generating model at 92\% accuracy, plus sentence-ending rhetoric, which disperses across models more than any core rhythm metric. Human/AI discrimination is best served by vocabulary (AUC 0.998), which aggregates both layers; model attribution is served almost solely by layer 2. Compactly: \emph{what} is written tells you which model; \emph{how} it is written tells you a machine wrote it.
+The results organize into two layers, summarized in Figure~\ref{fig:layers}. \textbf{Layer 1 (shared machine accent)}: rhythmic monotonization (suppressed burstiness, uniform paragraph structure, compressed sentence-length variation) points the same way in all 7 models and supports human/AI discrimination at AUC $\approx 0.90$ with 13 interpretable features. \textbf{Layer 2 (model signature)}: the lexical profile, which identifies the generating model at 92\% accuracy, plus sentence-ending rhetoric, which disperses across models more than any core rhythm metric. Human/AI discrimination is best served by vocabulary (AUC 0.998), which aggregates both layers; model attribution is served almost solely by layer 2. Compactly: \emph{what} is written tells you which model; \emph{how} it is written tells you a machine wrote it.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  font=\small,
+  topbox/.style={draw, rounded corners=2pt, align=center, inner sep=7pt, fill=gray!8},
+  layerbox/.style={draw, rounded corners=3pt, align=left, inner sep=9pt, text width=6.6cm, anchor=north},
+  arrow/.style={-{Latex[length=2.5mm]}, thick},
+  lab/.style={font=\small\itshape, align=center}
+]
+\node[topbox] (doc) at (0, 2.9) {A Japanese document\\(350 AI from 7 LLMs / 696 human)};
+\node[layerbox] (rhythm) at (-3.95, 1.0) {%
+  \emph{how it is written}\\[2pt]\textbf{Layer 1: shared machine accent}\\[3pt]
+  13 rhythm metrics: burstiness, sentence-length CV, paragraph-structure CV, \ldots\\[3pt]
+  Direction shared by \emph{all 7 models}; magnitude model-dependent ($d=-0.59$ to $-1.72$)\\[3pt]
+  Human/AI AUC 0.897; 7-way model ID 51\%\\[3pt]
+  $\Rightarrow$ tells you \emph{a model} wrote it};
+\node[layerbox] (lex) at (3.95, 1.0) {%
+  \emph{what is written}\\[2pt]\textbf{Layer 2: model signature}\\[3pt]
+  Document-occurrence lexical profile, plus sentence-ending rhetoric\\[3pt]
+  Model-specific choices: 纏め, 於く, 用いる range from 0\% to 98\% across models\\[3pt]
+  Human/AI AUC 0.998; 7-way model ID 92\%\\[3pt]
+  $\Rightarrow$ tells you \emph{which model} wrote it};
+\draw[arrow] ([xshift=-1.2cm]doc.south) -- (rhythm.north);
+\draw[arrow] ([xshift=1.2cm]doc.south) -- (lex.north);
+\end{tikzpicture}
+\caption{The two-layer fingerprint structure of Japanese LLM-generated text. Rhythm shifts in a direction common to all 7 models and separates human from AI text, but barely distinguishes the models from each other; the lexical profile does both, and is the only family that identifies the generating model. Numbers from Tables~\ref{tab:rhythm}--\ref{tab:ratios}.}
+\label{fig:layers}
+\end{figure}
 
 This structure connects to the homogenization literature: \citet{munozortiz2024contrasting} observed for English that inter-LLM differences are smaller than the human--LLM gap on dispersion measures, and our layer-1 finding replicates that shape in Japanese at effect sizes up to $d=-0.96$. That the shared layer is rhythmic and the differentiating layer is lexical is also consistent with alignment-tuning accounts~\citep{juzek2025overuse, rlhf2025detectability, padmakumar2024diversity}: pressure toward well-organized, uniformly readable output plausibly acts on all tuned models alike, while each model's lexical preferences remain idiosyncratic to its training mix and feedback data.
 
