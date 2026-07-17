@@ -10,5 +10,6 @@
   "survive_all3": 259,
   "new_sig_fdr_total_1684": 797,
   "new_sig_bonf_total_1684": 381,
-  "newly_sig_not_in_651": 300
+  "newly_sig_not_in_651": 354,
+  "newly_sig_not_in_651_direction_matched": 300
 }

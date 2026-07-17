@@ -266,7 +266,10 @@ def main():
         "survive_all3": len(surv_all3),
         "new_sig_fdr_total_1684": int(sig_fdr.sum()),
         "new_sig_bonf_total_1684": int(sig_bonf.sum()),
-        "newly_sig_not_in_651": sum(1 for r in rows if r["survives_fdr"] and not r["old_sig_bonferroni"]),
+        # 「新たに有意」は素直に sig_fdr のみで数える (方向一致は旧発見の生存判定にのみ意味を持つ)
+        "newly_sig_not_in_651": sum(1 for r in rows if r["sig_fdr"] and not r["old_sig_bonferroni"]),
+        # 参考: 旧手法での方向 (非有意時の符号) と新手法の方向が一致するものに限った数
+        "newly_sig_not_in_651_direction_matched": sum(1 for r in rows if r["survives_fdr"] and not r["old_sig_bonferroni"]),
     }
     (RESULTS / "summary_counts.json").write_text(
         json.dumps(summary_counts, ensure_ascii=False, indent=2), encoding="utf-8")
