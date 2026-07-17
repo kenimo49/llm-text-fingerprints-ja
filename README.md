@@ -1,8 +1,10 @@
 # Lexical and Rhythmic Fingerprints of Japanese LLM-Generated Text
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21413035.svg)](https://doi.org/10.5281/zenodo.21413035)
+
 A cross-model, two-layer analysis of what makes Japanese AI-generated text machine-like: word choice (lexical fingerprints) vs. rhythm (sentence-length variation, burstiness, paragraph structure). 7 LLMs × 350 generated documents vs. 700 human technical-blog articles.
 
-Paper: [`paper/main.tex`](paper/main.tex) (English, compiled PDF included).
+Paper: [`paper/main.tex`](paper/main.tex) (English, compiled PDF included) — published on Zenodo: [10.5281/zenodo.21413035](https://doi.org/10.5281/zenodo.21413035).
 
 ## Research questions
 
