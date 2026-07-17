@@ -1,0 +1,319 @@
+% references.bib — paper 3 (lexical vs. rhythmic fingerprints in Japanese AI-generated text)
+% Base: excess-vocabulary-ja/paper/references.bib (verified entries) merged with
+% iris-lab exp028 paper-draft/references-additions.bib (2026-07-17).
+% Kobak is cited once, as the Science Advances version (kobak2025excess);
+% the old arXiv-only key kobak2024vocabulary is intentionally dropped.
+% Entries marked "% TODO" need bibliographic completion before submission.
+
+%% ---------- 1. Detection ----------
+
+@article{wu2025survey,
+  title={A Survey on {LLM}-Generated Text Detection: Necessity, Methods, and Future Directions},
+  author={Wu, Junchao and Yang, Shu and Zhan, Runzhe and Yuan, Yulin and Chao, Lidia Sam and Wong, Derek Fai},
+  journal={Computational Linguistics},
+  volume={51},
+  number={1},
+  pages={275--338},
+  year={2025},
+  note={\url{https://aclanthology.org/2025.cl-1.8.pdf}}
+}
+
+@inproceedings{gehrmann2019gltr,
+  title={{GLTR}: Statistical Detection and Visualization of Generated Text},
+  author={Gehrmann, Sebastian and Strobelt, Hendrik and Rush, Alexander},
+  booktitle={Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics: System Demonstrations},
+  year={2019},
+  note={\url{https://aclanthology.org/P19-3019/}}
+}
+
+@inproceedings{mitchell2023detectgpt,
+  title={{DetectGPT}: Zero-Shot Machine-Generated Text Detection using Probability Curvature},
+  author={Mitchell, Eric and Lee, Yoonho and Khazatsky, Alexander and Manning, Christopher D. and Finn, Chelsea},
+  booktitle={Proceedings of the 40th International Conference on Machine Learning (ICML)},
+  year={2023},
+  note={arXiv:2301.11305}
+}
+
+% TODO: hans2024binoculars — complete the author list from arXiv:2401.12070 (currently "and others").
+@inproceedings{hans2024binoculars,
+  title={Spotting {LLMs} With Binoculars: Zero-Shot Detection of Machine-Generated Text},
+  author={Hans, Abhimanyu and Schwarzschild, Avi and Cherepanova, Valentin and others},
+  booktitle={Proceedings of the 41st International Conference on Machine Learning (ICML)},
+  year={2024},
+  note={arXiv:2401.12070}
+}
+
+% TODO: tarim2025detection — full first names and possible subtitle unverified; check arXiv:2507.10475.
+@misc{tarim2025detection,
+  title={Can You Detect the Difference?},
+  author={Tar{\i}m, {\.I}. and Onan, A.},
+  year={2025},
+  note={arXiv preprint arXiv:2507.10475}
+}
+
+%% ---------- 2. Excess vocabulary / lexical fingerprints ----------
+
+% TODO: kobak2025excess — add Science Advances volume/number/pages (resolvable from the DOI).
+@article{kobak2025excess,
+  title={Delving into {LLM}-assisted writing in biomedical publications through excess vocabulary},
+  author={Kobak, Dmitry and Gonz{\'a}lez-M{\'a}rquez, Rita and Horv{\'a}t, Em{\H{o}}ke-{\'A}gnes and Lause, Jan},
+  journal={Science Advances},
+  year={2025},
+  doi={10.1126/sciadv.adt3813},
+  note={arXiv:2406.07016}
+}
+
+% TODO: liang2024monitoring — complete the author list from arXiv:2403.07183.
+@inproceedings{liang2024monitoring,
+  title={Monitoring {AI}-Modified Content at Scale: A Case Study on the Impact of {ChatGPT} on {AI} Conference Peer Reviews},
+  author={Liang, Weixin and Izzo, Zachary and Zhang, Yaohui and others},
+  booktitle={Proceedings of the 41st International Conference on Machine Learning (ICML)},
+  year={2024},
+  note={arXiv:2403.07183}
+}
+
+% TODO: juzek2025delve — add page numbers (ACL Anthology 2025.coling-main.426).
+@inproceedings{juzek2025delve,
+  title={Why Does {ChatGPT} ``Delve'' So Much? Exploring the Sources of Lexical Overrepresentation in Large Language Models},
+  author={Juzek, Tom S. and Ward, Zina B.},
+  booktitle={Proceedings of the 31st International Conference on Computational Linguistics (COLING)},
+  year={2025},
+  note={\url{https://aclanthology.org/2025.coling-main.426/}}
+}
+
+% TODO: juzek2025overuse — confirm formal proceedings entry for BIAS 2025 at ECML PKDD; cited as arXiv preprint for now.
+@misc{juzek2025overuse,
+  title={Word Overuse and Alignment in Large Language Models},
+  author={Juzek, Tom S. and Ward, Zina B.},
+  year={2025},
+  note={arXiv preprint arXiv:2508.01930. Presented at the BIAS 2025 workshop at ECML PKDD}
+}
+
+%% ---------- Self-citations (prior work) ----------
+
+@misc{imoto2026excess,
+  title={Excess Vocabulary in {Japanese} {AI}-Generated Text: A Cross-Model Quantitative Analysis},
+  author={Imoto, Ken},
+  year={2026},
+  doi={10.5281/zenodo.19233934},
+  note={Zenodo}
+}
+
+@misc{imoto2025slop,
+  title={{AI} Text Slop: Quantitative Analysis of 16 Structural Patterns in {LLM}-Generated Japanese Text},
+  author={Imoto, Ken},
+  year={2025},
+  doi={10.5281/zenodo.19173035},
+  note={Zenodo}
+}
+
+%% ---------- 3. Cross-lingual & Japanese ----------
+
+% TODO: macko2023multitude — complete the author list and page numbers (ACL Anthology 2023.emnlp-main.616).
+@inproceedings{macko2023multitude,
+  title={{MULTITuDE}: Large-Scale Multilingual Machine-Generated Text Detection Benchmark},
+  author={Macko, Dominik and Moro, Robert and Uchendu, Adaku and others},
+  booktitle={Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing},
+  year={2023},
+  note={\url{https://aclanthology.org/2023.emnlp-main.616/}}
+}
+
+% TODO: wang2024m4 — complete the author list and the formal EACL 2024 proceedings data (pages).
+@inproceedings{wang2024m4,
+  title={{M4}: Multi-Generator, Multi-Domain, and Multi-Lingual Black-Box Machine-Generated Text Detection},
+  author={Wang, Yuxia and Mansurov, Jonibek and Ivanov, Petar and others},
+  booktitle={Proceedings of the 18th Conference of the European Chapter of the Association for Computational Linguistics (EACL)},
+  year={2024},
+  note={arXiv:2305.14902}
+}
+
+@misc{juzek2026lexical,
+  title={{AI}-Associated Lexical Shifts Across 34 Languages},
+  author={Juzek, Thomas S.},
+  year={2026},
+  note={arXiv preprint arXiv:2605.25358}
+}
+
+% TODO: iwata2025jsai — romanized author names (Iwata Rio / Tsunakawa Takashi / Nishida Masafumi, Shizuoka Univ.) are inferred;
+% confirm official romanization and session-number format against the JSAI2025 proceedings (J-STAGE 4G1GS604).
+@inproceedings{iwata2025jsai,
+  title={大規模言語モデルにより生成された日本語テキストの検出性能の検証 [Verification of Detection Performance for {Japanese} Texts Generated by Large Language Models]},
+  author={Iwata, Rio and Tsunakawa, Takashi and Nishida, Masafumi},
+  booktitle={Proceedings of the Annual Conference of the Japanese Society for Artificial Intelligence (JSAI2025)},
+  year={2025},
+  note={In Japanese. \url{https://www.jstage.jst.go.jp/article/pjsai/JSAI2025/0/JSAI2025_4G1GS604/_article/-char/ja}}
+}
+
+% TODO: jin2013bunsetsu — confirm end of page range (J-STAGE indicates start p.17); English title is a provisional translation.
+@article{jin2013bunsetsu,
+  title={文節パターンに基づいた文章の書き手の識別 [Author Identification Based on Bunsetsu Patterns]},
+  author={Jin, Mingzhe},
+  journal={行動計量学 (The Japanese Journal of Behaviormetrics)},
+  volume={40},
+  number={1},
+  year={2013},
+  note={In Japanese. \url{https://www.jstage.jst.go.jp/article/jbhmk/40/1/40_17/_pdf}}
+}
+
+% TODO: jin2014integrated — confirm end of page range (J-STAGE indicates start p.35); English title is a provisional translation.
+@article{jin2014integrated,
+  title={統合的分類アルゴリズムを用いた文章の書き手の識別 [Author Identification Using an Integrated Classification Algorithm]},
+  author={Jin, Mingzhe},
+  journal={行動計量学 (The Japanese Journal of Behaviormetrics)},
+  volume={41},
+  number={1},
+  year={2014},
+  note={In Japanese. \url{https://www.jstage.jst.go.jp/article/jbhmk/41/1/41_35/_pdf}}
+}
+
+% TODO: ishida2004academic — year ("circa 2004"), venue, full author list, and romanization all unconfirmed; verify against the PDF.
+@misc{ishida2004academic,
+  title={文体からみた学術的文献の特徴分析 [Stylistic Analysis of the Characteristics of Academic Documents]},
+  author={Ishida, Emi and Agata, Teru and Nozue, Michiko and others},
+  year={2004},
+  note={In Japanese. \url{http://user.keio.ac.jp/~ueda/papers/webir041.pdf}}
+}
+
+@article{zaitsu2023chatgpt,
+  title={Distinguishing {ChatGPT}(-3.5, -4)-generated and human-written papers through {Japanese} stylometric analysis},
+  author={Zaitsu, Wataru and Jin, Mingzhe},
+  journal={PLOS ONE},
+  volume={18},
+  number={8},
+  pages={e0288453},
+  year={2023},
+  doi={10.1371/journal.pone.0288453}
+}
+
+@article{zaitsu2025stylometry,
+  title={Stylometry can reveal artificial intelligence authorship, but humans struggle: A comparison of human and seven large language models in {Japanese}},
+  author={Zaitsu, Wataru and Jin, Mingzhe and Ishihara, Shunichi and Tsuge, Satoru and Inaba, Minoru},
+  journal={PLOS ONE},
+  volume={20},
+  number={10},
+  pages={e0335369},
+  year={2025},
+  doi={10.1371/journal.pone.0335369}
+}
+
+%% ---------- 4. Rhythm / diversity / homogenization ----------
+
+% TODO: munozortiz2024contrasting — add volume/pages (resolvable from DOI 10.1007/s10462-024-10903-2).
+@article{munozortiz2024contrasting,
+  title={Contrasting Linguistic Patterns in Human and {LLM}-Generated News Text},
+  author={Mu{\~n}oz-Ortiz, Alberto and G{\'o}mez-Rodr{\'i}guez, Carlos and Vilares, David},
+  journal={Artificial Intelligence Review},
+  year={2024},
+  doi={10.1007/s10462-024-10903-2},
+  note={arXiv:2308.09067}
+}
+
+% TODO: sourati2025shrinking — complete the author list from arXiv:2502.11266.
+@misc{sourati2025shrinking,
+  title={The Shrinking Landscape of Linguistic Diversity in the Age of Large Language Models},
+  author={Sourati, Zhivar and others},
+  year={2025},
+  note={arXiv preprint arXiv:2502.11266}
+}
+
+@inproceedings{padmakumar2024diversity,
+  title={Does Writing with Language Models Reduce Content Diversity?},
+  author={Padmakumar, Vishakh and He, He},
+  booktitle={The Twelfth International Conference on Learning Representations (ICLR)},
+  year={2024},
+  note={arXiv:2309.05196}
+}
+
+% TODO: rlhf2025detectability — AUTHOR NAMES REQUIRED. Complete from arXiv:2503.17965 before submission
+% (entry currently has no author; plainnat will fall back to the key label).
+@misc{rlhf2025detectability,
+  key={RLHF-Detectability},
+  title={Understanding the Effects of {RLHF} on the Quality and Detectability of {LLM}-Generated Texts},
+  year={2025},
+  note={arXiv preprint arXiv:2503.17965}
+}
+
+% TODO: homogenizing2026review — AUTHOR NAMES REQUIRED. Complete from arXiv:2508.01491 (v2, 2026-01);
+% also confirm first-publication year (arXiv ID suggests 2025-08).
+@misc{homogenizing2026review,
+  key={Homogenizing-Effect},
+  title={The Homogenizing Effect of Large Language Models on Human Expression and Thought},
+  year={2026},
+  note={arXiv preprint arXiv:2508.01491 (v2, January 2026)}
+}
+
+% TODO: gptzero2023burstiness — confirm exact title and publication year of the official blog post (updated periodically).
+@misc{gptzero2023burstiness,
+  title={Perplexity and Burstiness: What Is It?},
+  author={{GPTZero}},
+  year={2023},
+  note={\url{https://gptzero.me/news/perplexity-and-burstiness-what-is-it/}}
+}
+
+% TODO: mizoguchi2026natural — English title is a paraphrase of the repository description; adjust to the official wording if needed.
+@misc{mizoguchi2026natural,
+  title={natural-japanese: Detecting the ``{AI} smell'' of {Japanese} text from sentence-length rhythm},
+  author={Mizoguchi, Coji},
+  year={2026},
+  note={MIT-licensed lint tool. \url{https://github.com/coji/natural-japanese}. Accompanying article: \url{https://zenn.dev/coji/articles/natural-japanese-ai-smell-lint}}
+}
+
+%% ---------- 5. Methods / statistics ----------
+
+@misc{kudo2006mecab,
+  title={{MeCab}: Yet Another Part-of-Speech and Morphological Analyzer},
+  author={Kudo, Taku},
+  year={2006},
+  note={\url{https://taku910.github.io/mecab/}}
+}
+
+@misc{unidic2021,
+  title={UniDic: Universal Dictionary for Morphological Analysis of {Japanese}},
+  author={{National Institute for Japanese Language and Linguistics}},
+  year={2021},
+  note={\url{https://clrd.ninjal.ac.jp/unidic/}}
+}
+
+@article{goh2008burstiness,
+  title={Burstiness and memory in complex systems},
+  author={Goh, Kwang-Il and Barab{\'a}si, Albert-L{\'a}szl{\'o}},
+  journal={EPL (Europhysics Letters)},
+  volume={81},
+  number={4},
+  pages={48002},
+  year={2008},
+  doi={10.1209/0295-5075/81/48002}
+}
+
+@article{covington2010mattr,
+  title={Cutting the {Gordian} knot: The moving-average type--token ratio ({MATTR})},
+  author={Covington, Michael A. and McFall, Joe D.},
+  journal={Journal of Quantitative Linguistics},
+  volume={17},
+  number={2},
+  pages={94--100},
+  year={2010},
+  doi={10.1080/09296171003643098}
+}
+
+@article{benjamini1995fdr,
+  title={Controlling the false discovery rate: A practical and powerful approach to multiple testing},
+  author={Benjamini, Yoav and Hochberg, Yosef},
+  journal={Journal of the Royal Statistical Society: Series B (Methodological)},
+  volume={57},
+  number={1},
+  pages={289--300},
+  year={1995},
+  doi={10.1111/j.2517-6161.1995.tb02031.x}
+}
+
+@article{phipson2010permutation,
+  title={Permutation $p$-values should never be zero: Calculating exact $p$-values when permutations are randomly drawn},
+  author={Phipson, Belinda and Smyth, Gordon K.},
+  journal={Statistical Applications in Genetics and Molecular Biology},
+  volume={9},
+  number={1},
+  pages={Article 39},
+  year={2010},
+  doi={10.2202/1544-6115.1585}
+}

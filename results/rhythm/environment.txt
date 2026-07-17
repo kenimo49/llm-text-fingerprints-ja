@@ -1,0 +1,8 @@
+{
+  "python": "3.10.12 (main, Mar  3 2026, 11:56:32) [GCC 11.4.0]",
+  "mecab-python3": "1.0.12",
+  "unidic-lite": "1.0.8",
+  "numpy": "2.2.6",
+  "scipy": "1.15.3",
+  "pandas": "2.3.3"
+}

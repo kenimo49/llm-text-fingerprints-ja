@@ -1,0 +1,12 @@
+{
+  "python": "3.10.12 (main, Mar  3 2026, 11:56:32) [GCC 11.4.0]",
+  "platform": "Linux-5.15.0-91-generic-x86_64-with-glibc2.35",
+  "numpy": "2.2.6",
+  "scipy": "1.15.3",
+  "pandas": "2.3.3",
+  "sklearn": "1.7.2",
+  "mecab-python3": "1.0.12",
+  "unidic-lite": "1.0.8",
+  "seed_global": 20260717,
+  "notes": "CV/bootstrap/permutation の全乱数 seed=20260717。compute_mattr.py は乱数不使用。"
+}

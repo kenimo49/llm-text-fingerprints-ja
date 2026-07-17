@@ -1,0 +1,384 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{CJKutf8}
+
+\bibliographystyle{plainnat}
+
+\title{Lexical and Rhythmic Fingerprints of Japanese LLM-Generated Text:\\A Cross-Model, Two-Layer Analysis}
+\author{Ken Imoto\\Propel-lab\\Tokyo, Japan\\\texttt{imoto@propel-lab.co.jp}\\\url{https://kenimoto.dev}}
+\date{July 2026}
+
+\begin{document}
+\begin{CJK}{UTF8}{min}
+
+\maketitle
+
+\begin{abstract}
+Which feature family carries the human/AI signal in Japanese LLM-generated text: word choice or rhythm? Practitioner tools claim that the ``AI smell'' of Japanese text resides in rhythm (monotone sentence-length variation) rather than vocabulary, but this claim has not been tested against lexical features under a controlled design. We compare lexical and rhythmic fingerprints on a corpus of 350 texts from 7 LLMs (Claude 3 Haiku, Claude Sonnet 4, Claude Opus 4, GPT-3.5 Turbo, GPT-4o, GPT-OSS 20B, Llama 3.2 1B) against 700 human technical-blog articles. We first rebuild the excess-vocabulary statistics of our prior study on a document-occurrence basis with Laplace smoothing, frequency ratio $r$ and gap $\delta$, document-level $\chi^2$ tests with BH-FDR correction, and bootstrap confidence intervals, following the design of Kobak et al.\ (2025). This re-analysis is also a correction: 35\% of the 651 words we previously reported as significant do not survive at the document level, because token-level $\chi^2$ tests treat repeated occurrences within one document as independent evidence. We then measure 13 interpretable rhythm metrics, including burstiness of sentence-length sequences and a mora-based approximation of phonological rhythm. Three findings emerge. (1)~Rhythmic monotonization is real and shared: AI text shows lower burstiness (Cohen's $d=-0.96$), lower paragraph-structure variation ($d=-0.67$), and lower sentence-length variation ($d=-0.56$), with the same direction in all 7 models. (2)~Contrary to the practitioner claim, lexical features dominate human/AI discrimination: cross-validated AUC is 0.998 for lexical vs.\ 0.897 for rhythm features (paired difference $-0.101$, 95\% CI $[-0.105, -0.097]$), and the gap persists under document-length residualization and outlier-model exclusion. (3)~The two families form a two-layer fingerprint: lexical profiles identify \emph{which} model wrote a text (92\% accuracy in 7-way model identification vs.\ 51\% for rhythm), whereas rhythm features shift in a direction common to all models. Rhythm is a shared accent of machine writing; vocabulary is the signature of the individual model.
+\end{abstract}
+
+\section{Introduction}
+
+Detection of machine-generated text usually asks a binary question---was this written by a model?---and answers it with an opaque score. A complementary question is \emph{what} makes machine text machine-like. For English, one well-established answer is lexical: LLMs overuse a measurable set of words (\textit{delve}, \textit{intricate}, \textit{commendable}), and this excess vocabulary is strong enough to estimate LLM involvement at the population level~\citep{kobak2025excess, liang2024monitoring, juzek2025delve}. For Japanese, a competing answer has emerged from practice: the \texttt{natural-japanese} lint tool argues that the ``AI smell'' (AI臭) of Japanese text lives in \emph{rhythm}---monotone sentence lengths, uniform paragraph structure---rather than in vocabulary~\citep{mizoguchi2026natural}. The two answers have never been placed in the same experiment.
+
+This paper does so. Using the corpus of our prior excess-vocabulary study~\citep{imoto2026excess}---350 texts from 7 LLMs and 700 human technical-blog articles---we quantify both feature families under a shared evaluation protocol and test two hypotheses:
+
+\begin{itemize}
+    \item \textbf{H1 (discriminative power)}: the human/AI discriminative power of lexical and rhythm features differs; the practitioner claim predicts rhythm $>$ lexical.
+    \item \textbf{H2 (fingerprint layering)}: rhythm fingerprints are homogeneous across models while lexical fingerprints differentiate them, forming a two-layer structure.
+\end{itemize}
+
+Before the comparison, we rebuild our lexical statistics from the ground up. A methods audit of our prior study against \citet{kobak2025excess} found that its per-word $\chi^2$ tests used token counts as independent trials. Tokens within a document are strongly correlated---one article that repeats a term dozens of times contributes dozens of pseudo-independent observations---so the tests were affected by pseudoreplication, which inflates $\chi^2$ statistics and deflates $p$-values. We re-estimate all word statistics on a document-occurrence basis with Laplace smoothing, dual effect-size indices (frequency ratio $r$ and frequency gap $\delta$), BH-FDR correction, and document-level bootstrap confidence intervals. The result is a correction we state plainly: of the 651 words our prior study reported as significant, only 424 (65.1\%) survive the document-based re-analysis, and on the AI-excess side only 237 of 458 (51.7\%) survive.
+
+This paper makes four contributions:
+\begin{enumerate}
+    \item A \textbf{document-occurrence re-analysis} of Japanese excess vocabulary with $r$/$\delta$ indices, Laplace smoothing, FDR control, and bootstrap CIs, including a quantified correction of our prior token-based results.
+    \item The first \textbf{controlled comparison of lexical vs.\ rhythmic discriminative power} for Japanese human/AI classification, with leakage-safe within-fold feature selection, document-length residualization, and outlier sensitivity analyses.
+    \item A set of \textbf{13 interpretable rhythm metrics} for Japanese, including burstiness of sentence-length sequences in characters and in approximated moras, measured across 7 LLMs.
+    \item Evidence for a \textbf{two-layer fingerprint structure}: rhythm shifts in a direction shared by all models (layer 1), while lexical profiles and sentence-ending rhetoric are model-specific (layer 2).
+\end{enumerate}
+
+\section{Related Work}
+
+\paragraph{Detection of LLM-Generated Text.}
+Machine-generated text (MGT) detection is by now a well-developed research area; \citet{wu2025survey} organize the field into watermarking, statistical zero-shot methods, fine-tuned classifiers, and human-assisted approaches. The statistical line began with GLTR~\citep{gehrmann2019gltr}, which exposes per-token probability, rank, and predictive entropy under a reference language model and raised human detection accuracy from 54\% to 72\%. DetectGPT~\citep{mitchell2023detectgpt} introduced zero-shot detection based on the observation that machine-generated text tends to occupy negative-curvature regions of a model's log-probability function, requiring no training data or model-specific classifier. Binoculars~\citep{hans2024binoculars} contrasts the perplexity assigned by two closely related pretrained models and reports detecting over 90\% of ChatGPT-generated samples at a 0.01\% false positive rate, without using any data from the target model. These detectors answer \emph{whether} a text is machine-generated, but they return an opaque score: they do not identify which lexical choices or which rhythmic properties make a text machine-like. Interpretable alternatives built on classical stylometric features such as sentence length, lexical diversity, and readability have been explored outside English~\citep{tarim2025detection}, but not for Japanese. Our study addresses this explanatory side of the problem: quantifying \emph{which} feature families carry the human/AI signal in Japanese.
+
+\paragraph{Excess Vocabulary and Lexical Fingerprints.}
+A parallel line of work characterizes LLM output at the word level. \citet{kobak2025excess} formalized the \emph{excess vocabulary} approach: rather than assuming a word list a priori, they detect words whose frequency rose abnormally after the introduction of LLMs, analyzing roughly 15 million PubMed abstracts (2010--2024) and estimating that at least 13.5\% of 2024 abstracts were processed with LLMs.
+% TODO: re-verify the abstract count (15.1M per our methods audit of arXiv:2406.07016v5; an earlier knowledge note said ~14M / >=10%) against the published Science Advances version before submission. \citet{liang2024monitoring} estimated LLM involvement in AI-conference peer reviews at the population level from disproportionately used adjectives (e.g., \textit{commendable}, \textit{meticulous}, \textit{intricate}), concluding that 6.5--16.9\% of reviews were substantially modified by LLMs. \citet{juzek2025delve} identified 21 focal words, including \textit{delve}, that occur at 3--5$\times$ human frequency in LLM output, systematically ruled out model architecture, training data, and decoding algorithms as explanations, and pointed instead to human feedback; a follow-up study supports this attribution with human-participant experiments~\citep{juzek2025overuse}. All of these studies concern English. In prior work, we transferred the excess-vocabulary methodology to Japanese, identifying 651 statistically significant excess words across 7 LLMs against a human technical-blog baseline~\citep{imoto2026excess}, and separately catalogued 16 structural patterns characteristic of Japanese AI text~\citep{imoto2025slop}. The present study reuses the corpus of the first study directly and, as detailed in Section~\ref{sec:reanalysis}, corrects its statistical basis.
+
+\paragraph{Cross-Lingual and Japanese Studies.}
+Multilingual MGT resources largely bypass Japanese. MULTITuDE covers 74{,}081 texts generated by 8 LLMs in 11 languages~\citep{macko2023multitude}, and M4 spans multiple generators, domains, and languages~\citep{wang2024m4}; neither includes Japanese, and both document poor detector generalization to unseen languages and generators. The closest lexical study is \citet{juzek2026lexical}, which measures AI-associated lexical shifts in 34 languages, including Japanese, by comparing GPT-4.1-family outputs with human text and validating the resulting word sets against News Crawl data (2020--2021 vs.\ 2023--2024). However, results for Japanese are reported only at the aggregate level, no Japanese word list is published, and the analysis relies on a single model family, precluding cross-model comparison. On the detection side, \citet{iwata2025jsai} adapted Binoculars to Japanese with a focal-loss refinement, reaching accuracy and F-scores of 0.94 or higher for texts of 200 characters or more; their setup uses a single generator (GPT-3.5 Turbo) against the OSCAR corpus, evaluates detection scores only without characterizing features, and explicitly notes the scarcity of prior work on Japanese. Japanese quantitative stylometry itself offers a long tradition of statistical authorship analysis: bunsetsu-level part-of-speech patterns provide vocabulary-independent syntactic fingerprints~\citep{jin2013bunsetsu}, integrated classifiers combine morpheme, particle-distribution, and comma-placement features for author identification~\citep{jin2014integrated}, and stylistic statistics such as sentence length and part-of-speech ratios discriminate text genres~\citep{ishida2004academic}. This tradition has recently been extended to AI-generated text, showing that stylometric features separate LLM-generated Japanese from human writing even where human judges fail~\citep{zaitsu2023chatgpt, zaitsu2025stylometry}. These works establish morpheme- and syntax-level stylistic fingerprints for Japanese, but none contrasts lexical against rhythmic feature families across multiple LLMs.
+
+\paragraph{Rhythm, Diversity, and Homogenization.}
+A separate body of evidence indicates that LLM output is \emph{rhythmically} more uniform than human writing. \citet{munozortiz2024contrasting} compared human news text with six LLMs across three model families and found that human sentence-length distributions are more dispersed and human vocabulary more diverse; notably, differences among LLMs were smaller than the human--LLM gap, suggesting that rhythm-level uniformity is shared across models. \citet{sourati2025shrinking} document linguistic homogenization in both observational data and controlled experiments, affecting lexical, syntactic, and stylistic dimensions. \citet{padmakumar2024diversity} showed in a controlled co-writing experiment that a feedback-tuned model (InstructGPT) significantly reduces content diversity among writers while a base model (GPT-3) does not, and detection-side work finds that RLHF systematically alters the statistical properties and detectability of generated text~\citep{rlhf2025detectability}; together with the human-feedback attribution of lexical overuse~\citep{juzek2025overuse}, these results triangulate alignment tuning as a driver of both lexical and rhythmic convergence. A recent review synthesizes these homogenization effects at the lexical, syntactic, and content levels~\citep{homogenizing2026review}. Practitioner tools operationalize the rhythm intuition directly. GPTZero popularized \emph{burstiness}---the within-document variation of perplexity---as a detection signal, on the premise that human writers vary sentence structure and vocabulary more than LLMs do~\citep{gptzero2023burstiness}. For Japanese, the \texttt{natural-japanese} lint~\citep{mizoguchi2026natural} measures sentence-length rhythm in moras, burstiness, the coefficient of variation of paragraph structure, and the repetition rate of the contrastive construction ではなく (\textit{de wa naku}) over a corpus of 137 human and 406 AI texts (7 models), and argues that the ``AI smell'' of Japanese text resides in rhythm rather than vocabulary. This claim rests on practical observation; it has not been tested in a controlled comparison against lexical features.
+
+\paragraph{Positioning of This Work.}
+The intersection of these strands is empty: no existing study contrasts lexical and rhythmic fingerprints of AI-generated Japanese under a controlled multi-LLM design. Lexical-fingerprint research is English-centric~\citep{kobak2025excess, juzek2025delve, liang2024monitoring}; the one cross-lingual study covering Japanese publishes no Japanese word list and uses a single model family~\citep{juzek2026lexical}; Japanese detection work is score-based and single-generator~\citep{iwata2025jsai}; and rhythm-level homogeneity has been documented for English~\citep{munozortiz2024contrasting, sourati2025shrinking} or asserted by practitioner tools without academic validation~\citep{mizoguchi2026natural}. Building on the corpus and the lexical catalog of our prior studies~\citep{imoto2026excess, imoto2025slop}, we compare the discriminative power of lexical and rhythm feature families for the human/AI distinction in Japanese (H1), and test whether the two families form a two-layer fingerprint structure in which rhythm features are homogeneous across models while lexical features differentiate them (H2).
+
+\section{Data and Methods}
+
+\subsection{Corpus}
+
+We reuse the corpus of our prior study~\citep{imoto2026excess} unchanged (read-only). The AI side comprises 350 documents: 7 LLMs---Claude 3 Haiku (\texttt{claude-3-haiku-20240307}), Claude Sonnet 4 (\texttt{claude-sonnet-4-20250514}), Claude Opus 4 (\texttt{claude-opus-4-20250514}), GPT-3.5 Turbo, GPT-4o, GPT-OSS 20B (Swallow), and Llama 3.2 1B---each generating 10 Japanese technical-blog themes 5 times under a unified prompt at default temperature. The human side comprises 700 pre-LLM articles (2020--2022; Qiita 567, Zenn 133). The lexical analyses use all 350 AI and 700 human documents. The rhythm and discrimination analyses exclude 4 human documents with fewer than 5 sentences, leaving 1{,}046 documents (AI 350; human 696 = Qiita 565 + Zenn 131).
+
+All analyses fix the random seed (20260717) and record dependency versions and the source-corpus commit hash in machine-readable metadata files alongside the results (Python 3.10.12, numpy 2.2.6, scipy 1.15.3, scikit-learn 1.7.2, pandas 2.3.3, mecab-python3 1.0.12, unidic-lite 1.0.8).
+
+\subsection{Document-Occurrence Excess Vocabulary}
+\label{sec:lexmethod}
+
+Our prior study computed word frequencies over tokens (occurrences per total tokens) and tested each word with a $\chi^2$ test whose contingency table used token totals as trial counts. A methods audit against \citet{kobak2025excess} identified this as pseudoreplication: tokens within one document are strongly correlated, so treating each token as an independent trial inflates the effective sample size (AI 121{,}243 / human 573{,}279 tokens) and makes near-arbitrary frequency differences ``significant.'' \citet{kobak2025excess} avoid exactly this by counting \emph{document occurrences}: a word occurring in a document counts once, however often it repeats (a binary document $\times$ word matrix).
+
+We therefore rebuild the statistics as follows. Tokenization is identical to the prior study (MeCab~\citep{kudo2006mecab} with UniDic-lite~\citep{unidic2021}, lemma forms); we verified compatibility by reproducing the prior token totals exactly. For each word $w$, let $a$ be the number of documents containing $w$ and $b$ the corpus document count. The smoothed document frequency is $p = (a+1)/(b+1)$ (Laplace smoothing, following Kobak et al.'s Methods), computed separately for the AI corpus ($p$, $b=350$) and the human corpus ($q$, $b=700$). We report both of Kobak et al.'s complementary effect-size indices:
+\begin{equation}
+    r = \frac{p}{q}, \qquad \delta = p - q,
+\end{equation}
+where $r$ (frequency ratio) is sensitive to excess in low-frequency words and $\delta$ (frequency gap) to excess in high-frequency words. Significance is assessed per word with a $\chi^2$ test on the document-count contingency table $[[a_{\text{AI}}, 350-a_{\text{AI}}], [a_{\text{H}}, 700-a_{\text{H}}]]$ (Yates continuity correction; Fisher's exact test when a marginal is zero), corrected with Benjamini--Hochberg FDR at $\alpha=0.05$~\citep{benjamini1995fdr} as the primary criterion and Bonferroni as a stricter secondary criterion. For each word we compute percentile 95\% confidence intervals for $r$ and $\delta$ by bootstrap over documents (both corpora resampled, $B=1{,}000$); these CIs are per-word and not adjusted for multiplicity.
+
+Two deliberate departures from \citet{kobak2025excess} deserve emphasis. First, their baseline is a \emph{counterfactual time-series extrapolation} within a single evolving corpus, with conservative projection ($q \geq p_{-2}$); ours is a cross-sectional comparison against a static pre-LLM human corpus, which is the appropriate design for controlled generation but has weaker confound separation (Section~\ref{sec:limitations}). Second, Kobak et al.\ perform \emph{no per-word hypothesis tests}: their robustness comes from effect-size thresholds and calibration against historical baseline years. Our per-word $\chi^2$/FDR layer is an addition, so this study should be read as a document-frequency variant with explicit testing, not as a replication of their pipeline. We also apply Laplace smoothing symmetrically to both corpora, a natural extension of their single-corpus formula without a direct counterpart in the original.
+
+\subsection{Re-Analysis of the Prior 651-Word List}
+\label{sec:reanalysis}
+
+The word universe is the 1{,}684 words tested in the prior study, of which 651 were reported significant under token-level $\chi^2$ with Bonferroni correction (458 in the AI-excess direction; 193 in the deficit direction, i.e., words humans use more). A prior word ``survives'' if it is significant under the new document-based criterion \emph{and} its direction ($r>1$ vs.\ $r<1$) matches the sign of the old excess score. This quantifies how much of the previously reported result was an artifact of token pseudoreplication.
+
+\subsection{Rhythm Metrics}
+\label{sec:rhythmmethod}
+
+We compute 13 interpretable rhythm metrics per document. Markdown is preprocessed by removing code blocks, headings, tables, rules, images, and URLs, keeping the inner text of links and inline code; list items are kept as sentences with markers stripped. Sentences are split on 。！？ and newlines, following the \texttt{natural-japanese} lint~\citep{mizoguchi2026natural}; sentences without Japanese characters are dropped, and documents with fewer than 5 sentences are excluded.
+
+\begin{itemize}
+    \item \textbf{Sentence length (characters)}: mean, SD, and coefficient of variation (CV) of sentence lengths in characters.
+    \item \textbf{Sentence length (moras)}: the same three statistics on approximated mora counts. Moras are approximated from the UniDic pronunciation field (katakana): small kana (ャュョァィゥェォヮ) merge into the preceding mora; ー, ッ, and ン each count as one mora; tokens without a reading (e.g., ASCII identifiers) contribute zero moras.
+    \item \textbf{Burstiness} of the sentence-length sequence, $B = (\sigma - \mu)/(\sigma + \mu)$ with population SD~\citep{goh2008burstiness}, computed for character lengths and mora lengths. $B$ approaches $-1$ for regular (monotone) sequences and grows with bursty variation; the application to sentence-length sequences follows \texttt{natural-japanese}.
+    \item \textbf{Paragraph sentence-count CV}: variation in the number of sentences per paragraph.
+    \item \textbf{Noun-ending rate} (体言止め): fraction of prose sentences (list items excluded) whose final content morpheme is a noun.
+    \item \textbf{ではなく per sentence}: rate of the contrastive construction ではなく (\textit{de wa naku}).
+    \item \textbf{Commas per sentence}.
+    \item \textbf{Sentence-ending bigram MATTR}: moving-average type--token ratio~\citep{covington2010mattr} over the sequence of sentence-final morpheme bigrams in prose sentences, window 20. Plain TTR depends on document length; MATTR removes this dependence. For documents with fewer than 20 ending bigrams (247 of 1{,}046) the window shrinks to the sequence length (recorded per document); fewer than 5 yields a missing value (15 documents).
+\end{itemize}
+
+Human/AI differences are summarized by two-sample Cohen's $d$ with pooled SD at the document level (positive $=$ AI higher), with bootstrap 95\% CIs ($n=2{,}000$); two-sided Mann--Whitney $U$ tests with Holm correction over the 13 metrics are reported as a secondary check, since rank tests are sensitive to distribution-shape differences at small $d$.
+
+\subsection{H1: Discrimination Design}
+\label{sec:h1method}
+
+We compare logistic-regression classifiers (L2, $C=1.0$) on three feature sets: (a)~lexical only (binary document occurrence over the full 25{,}902-word vocabulary), (b)~rhythm only (13 metrics), and (c)~both. Evaluation is stratified 5-fold cross-validation repeated 20 times ($100$ folds), with identical splits shared across feature sets so that AUC differences are paired at the fold level.
+
+\paragraph{Leakage prevention.} Lexical feature selection runs \emph{inside each training fold} only: a minimum-document filter (present in $\geq 5$ and $\leq n-5$ training documents), the document-count $\chi^2$ test of Section~\ref{sec:lexmethod}, and BH-FDR $q<0.05$. The globally selected significant-word set is never used for classification, since selecting features on the full data would bias AUC upward. Selected vocabulary sizes are roughly 1{,}300--1{,}600 words per fold. Rhythm-feature imputation (training-fold median) and z-scoring likewise use training-fold statistics only.
+
+\paragraph{Length control.} AI documents in this corpus are shorter than human articles, so any feature correlated with length could ride on a length confound. In the \texttt{lenadj} condition, both lexical and rhythm features are residualized against length covariates ($\log(1+\text{sentences})$, $\log(1+\text{characters})$) via linear regression fit within the training fold; a classifier using the two length covariates alone (\texttt{length\_only}) provides the reference.
+
+\paragraph{Sensitivity analyses.} Llama 3.2 1B occasionally produces degenerate outputs (extreme sentence-length statistics). We report (i)~\texttt{sens\_degen}, excluding the 6 Llama documents exceeding the human 99th percentile on any of three length/comma statistics, and (ii)~\texttt{sens\_nollama}, excluding all 50 Llama documents.
+
+\paragraph{Uncertainty.} 95\% CIs for AUCs and paired AUC differences are percentile bootstrap over the 100 fold values ($B=10{,}000$). Cross-validation folds share training data, so these CIs are approximate (anti-conservative); repeat-level means and SDs are reported alongside in the results files.
+
+\subsection{H2: Fingerprint Layering Design}
+\label{sec:h2method}
+
+H2 asks whether rhythm fingerprints are homogeneous across models while lexical fingerprints differentiate them. We operationalize this at two levels, using the 350 AI documents.
+
+\paragraph{Single-feature dispersion.} For each feature, the between/within ratio is the SD of the 7 per-model document means divided by the mean of the within-model SDs; smaller values mean more cross-model homogeneity. Features are the 13 rhythm metrics and the document-occurrence indicators of the 797 FDR-significant words. Because the ratio's null distribution differs between binary and continuous features, we run per-feature permutation tests (model labels shuffled, $n=1{,}000$, $+1$-corrected $p$-values~\citep{phipson2010permutation}) and also standardize each observed ratio against its permutation null ($z$). Lexical vs.\ rhythm ratios are compared with Mann--Whitney $U$ and rank-biserial correlation on both the raw ratio and $z$, with robustness variants (core-11 rhythm subset, words with $\geq 10$ AI documents, Llama excluded).
+
+\paragraph{Multivariate model identification.} Single binary word indicators carry structurally large within-model variance (Bernoulli $p(1-p)$), which can understate the model-specificity of the lexical \emph{profile} as a whole. As a complementary multivariate probe, we train multinomial logistic regression to identify which of the 7 models produced a document (stratified 5-fold $\times$ 5 repeats; lexical features filtered only by within-fold frequency, no model labels used in selection), comparing lexical against rhythm feature sets; chance is $1/7 = 14.3\%$.
+
+\section{Results}
+
+\subsection{Document-Level Excess Vocabulary and the Correction of the Prior List}
+\label{sec:lexresults}
+
+Of the 1{,}684 tested words, 797 are significant under the document-based criterion (BH-FDR $q<0.05$); 381 additionally pass Bonferroni. Table~\ref{tab:survival} shows the fate of the prior study's 651 significant words.
+
+\begin{table}[H]
+\centering
+\caption{Survival of the 651 words reported significant by the prior token-based analysis~\citep{imoto2026excess} under document-occurrence re-analysis. ``Survives'' requires significance under the new criterion with matching direction. Excess $=$ AI-overused; deficit $=$ human-overused.}
+\label{tab:survival}
+\small
+\begin{tabular}{lrrr}
+\toprule
+Criterion & Survivors / 651 & Excess (/458) & Deficit (/193) \\
+\midrule
+Document $\chi^2$ + BH-FDR (primary) & \textbf{424 (65.1\%)} & 237 (51.7\%) & 187 (96.9\%) \\
+Document $\chi^2$ + Bonferroni       & 259 (39.8\%) & 96 (21.0\%) & 163 (84.5\%) \\
+Bootstrap 95\% CI excludes $r=1$ (uncorrected) & 458 (70.4\%) & 266 (58.1\%) & 192 (99.5\%) \\
+All three criteria                   & 259 (39.8\%) & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Under the primary criterion, 35\% of the previously reported discoveries (227 of 651) are not supported at the document level; on the AI-excess side, roughly half vanish (458 $\to$ 237). Deficit-side words---high-frequency words such as 思う (\textit{omou}, ``to think''), which humans use far more often---survive almost entirely (96.9\%), because their differences are backed by broad document counts. Conversely, 300 words that were \emph{not} in the prior 651 become significant under the new criterion: document-level counting reveals words spread thinly across many documents that token counting under-weighted.
+
+The failure mode of the token-based test is concrete. The prior study's top-ranked word ``Hash'' (excess score $+189.1$) occurred 402 times in the AI corpus---but in only 2 of 350 AI documents (vs.\ 2 of 700 human documents). Token-level $\chi^2$ turned within-document repetition into hundreds of pseudo-independent trials and returned $p \approx 0$; at the document level the word is indistinguishable from chance ($r=2.00$, 95\% CI $[0.50, 7.99]$, $q=0.955$). Of the prior top-5 words, four die this way; only レート (\textit{rate}; 16 vs.\ 11 documents, $r=2.83$, $q=0.018$) survives.
+
+\begin{table}[H]
+\centering
+\caption{Top 10 excess words by frequency ratio $r$ and by frequency gap $\delta$ (FDR-significant, excess direction, document-occurrence statistics with Laplace smoothing). Doc counts are raw (AI /350, human /700); $r$ and $\delta$ use smoothed frequencies. Daggers ($\dagger$) mark ASCII fragments arising from MeCab segmentation of English spans embedded in Japanese text (see Limitations). Full statistics for all 1{,}684 words: \texttt{results/lexical/word\_stats.csv}.}
+\label{tab:topwords}
+\small
+\begin{tabular}{llrrrr}
+\toprule
+ & Word & $r$ [95\% CI] & $\delta$ & AI / Human docs & $q_{\text{FDR}}$ \\
+\midrule
+\multirow{10}{*}{by $r$}
+ & NF$^\dagger$ & 21.97 [8.99, 59.91] & 0.060 & 21 / 1 & $1.6\times10^{-8}$ \\
+ & スクリプティング (scripting) & 17.97 [7.99, 63.91] & 0.073 & 26 / 2 & $5.6\times10^{-10}$ \\
+ & Found$^\dagger$ & 16.98 [6.49, 45.93] & 0.046 & 16 / 1 & $2.2\times10^{-6}$ \\
+ & CSP & 16.98 [6.49, 47.93] & 0.046 & 16 / 1 & $2.2\times10^{-6}$ \\
+ & クロスサイトリクエストフォージェリ & 13.31 [5.99, 49.93] & 0.053 & 19 / 2 & $5.3\times10^{-7}$ \\
+ & Internal$^\dagger$ & 12.98 [4.66, 35.95] & 0.034 & 12 / 1 & $9.9\times10^{-5}$ \\
+ & チェックリスト (checklist) & 12.38 [6.24, 37.95] & 0.081 & 30 / 4 & $2.2\times10^{-10}$ \\
+ & デプロイメント (deployment) & 11.48 [5.19, 47.93] & 0.060 & 22 / 3 & $1.2\times10^{-7}$ \\
+ & Foreign$^\dagger$ & 10.98 [3.99, 31.95] & 0.028 & 10 / 1 & $6.6\times10^{-4}$ \\
+ & エスケープ (escape) & 10.78 [4.99, 30.98] & 0.070 & 26 / 4 & $1.1\times10^{-8}$ \\
+\midrule
+\multirow{10}{*}{by $\delta$}
+ & 向上 (improvement) & 2.94 & 0.416 [0.359, 0.476] & 220 / 149 & $9.6\times10^{-38}$ \\
+ & プラクティス (practice) & 6.51 & 0.393 [0.337, 0.447] & 162 / 49 & $1.2\times10^{-47}$ \\
+ & ベスト (best) & 6.30 & 0.386 [0.330, 0.444] & 160 / 50 & $3.9\times10^{-46}$ \\
+ & 纏め (summary) & 2.07 & 0.361 [0.307, 0.423] & 244 / 235 & $2.1\times10^{-26}$ \\
+ & 実践 (put into practice) & 5.14 & 0.360 [0.308, 0.415] & 156 / 60 & $2.8\times10^{-39}$ \\
+ & 品質 (quality) & 3.35 & 0.346 [0.288, 0.407] & 172 / 102 & $6.0\times10^{-31}$ \\
+ & 効率 (efficiency) & 2.52 & 0.333 [0.275, 0.393] & 193 / 153 & $3.5\times10^{-25}$ \\
+ & 解説 (explanation) & 2.37 & 0.306 [0.246, 0.364] & 185 / 156 & $1.9\times10^{-21}$ \\
+ & 活用 (utilization) & 2.21 & 0.287 [0.225, 0.347] & 183 / 165 & $7.8\times10^{-19}$ \\
+ & エンジニア (engineer) & 1.95 & 0.267 [0.205, 0.327] & 192 / 197 & $1.4\times10^{-15}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:topwords} lists the top excess words under each index. The two indices capture different strata, exactly as \citet{kobak2025excess} designed for English: $r$ surfaces low-frequency, AI-particular words (katakana technical loanwords such as スクリプティング, チェックリスト, デプロイメント), while $\delta$ surfaces high-frequency, function-adjacent vocabulary (向上, ベスト/プラクティス, 実践, 品質, 効率)---the formal ``improvement talk'' register of instruction-tuned models. The $r$/$\delta$ complementarity thus transfers to Japanese.
+
+\subsection{Rhythm: AI Text Is Monotone, in Every Model}
+\label{sec:rhythmresults}
+
+Table~\ref{tab:rhythm} reports the 13 rhythm metrics. The four largest human--AI differences are all \emph{variation-suppression} effects: burstiness of character-length sequences ($d=-0.96$), burstiness of mora-length sequences ($d=-0.80$), paragraph sentence-count CV ($d=-0.67$), and sentence-length CV ($d=-0.56$). AI text keeps sentence lengths and paragraph sizes in a narrow band where human writing swings; the mora-based replication of the character-based result indicates the monotony is phonological rhythm, not an artifact of orthography.
+
+\begin{table}[H]
+\centering
+\caption{Rhythm metrics, human (n=696) vs.\ AI (n=350), document level. $d$ = Cohen's $d$ (positive = AI higher) with bootstrap 95\% CI; MW $p$ = Mann--Whitney $U$ two-sided with Holm correction (secondary; rank tests are sensitive to shape differences at small $d$). The prior sentence-ending bigram TTR is replaced by MATTR (last row; see text).}
+\label{tab:rhythm}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Metric & Human mean$\pm$SD & AI mean$\pm$SD & $d$ [95\% CI] & MW $p$ (Holm) \\
+\midrule
+Burstiness (chars) & $-0.223 \pm 0.167$ & $-0.382 \pm 0.162$ & $\mathbf{-0.96}$ [$-1.12, -0.81$] & $1.8\times10^{-51}$ \\
+Burstiness (moras) & $-0.244 \pm 0.110$ & $-0.351 \pm 0.172$ & $\mathbf{-0.80}$ [$-1.00, -0.62$] & $2.1\times10^{-30}$ \\
+Paragraph sent.-count CV & $0.662 \pm 0.273$ & $0.487 \pm 0.243$ & $\mathbf{-0.67}$ [$-0.83, -0.50$] & $8.2\times10^{-26}$ \\
+Sentence-length CV (chars) & $0.679 \pm 0.344$ & $0.484 \pm 0.369$ & $-0.56$ [$-0.78, -0.36$] & $1.8\times10^{-51}$ \\
+Sentence-length CV (moras) & $0.621 \pm 0.157$ & $0.521 \pm 0.380$ & $-0.39$ [$-0.83, -0.17$] & $2.1\times10^{-30}$ \\
+Noun-ending rate (prose) & $0.137 \pm 0.183$ & $0.091 \pm 0.144$ & $-0.27$ [$-0.38, -0.15$] & $1.2\times10^{-16}$ \\
+Sentence-length mean (chars) & $51.40 \pm 46.80$ & $40.06 \pm 75.93$ & $-0.19$ [$-0.48, -0.02$] & $2.8\times10^{-18}$ \\
+Sentence-length mean (moras) & $40.81 \pm 23.07$ & $36.57 \pm 19.94$ & $-0.19$ [$-0.33, -0.07$] & $3.4\times10^{-6}$ \\
+ではなく per sentence & $0.008 \pm 0.016$ & $0.011 \pm 0.021$ & $+0.17$ [$+0.04, +0.31$] & $0.40$ \\
+Commas per sentence & $0.822 \pm 0.503$ & $1.104 \pm 2.894$ & $+0.16$ [$+0.08, +0.25$] & $0.075$ \\
+Sentence-length SD (chars) & $44.06 \pm 84.77$ & $30.50 \pm 192.54$ & $-0.10$ [$-0.40, +0.05$] & $1.0\times10^{-78}$ \\
+Sentence-length SD (moras) & $26.07 \pm 23.98$ & $23.30 \pm 75.41$ & $-0.06$ [$-0.40, +0.09$] & $3.5\times10^{-53}$ \\
+Ending-bigram MATTR (w=20) & $0.703 \pm 0.141^{a}$ & $0.558 \pm 0.196^{a}$ & $-0.31$ (all docs) & --- \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize $^{a}$Means shown for the window-20-satisfying subset (human $n=613$, AI $n=171$; subset $d=-0.94$);}\\
+\multicolumn{5}{l}{\footnotesize \phantom{$^{a}$}the headline $d=-0.31$ covers all documents with shrunken windows (see text).}
+\end{tabular}
+\end{table}
+
+\paragraph{Direction is model-universal.} Burstiness (chars), paragraph sentence-count CV, and sentence-length CV (chars) are lower than human in \emph{all seven models}; per-model burstiness effect sizes range from $d=-0.59$ to $-1.72$. The degree varies---GPT-3.5 and GPT-4o are the most monotone (burstiness $d \approx -1.4$ to $-2.2$), while Claude Sonnet 4, Claude Opus 4, and GPT-OSS 20B come closest to human variation ($d \approx -0.3$ to $-0.6$)---but no model deviates in the human direction. This is the pattern the practitioner claim predicts, and it holds across vendors, scales, and generations.
+
+\paragraph{A length artifact, caught and corrected.} An earlier iteration of this analysis measured sentence-ending bigram diversity as plain TTR and found AI \emph{more} diverse ($d=+0.24$). TTR falls with sequence length, and human documents average 80.9 sentences against 38.5 for AI, so the comparison favored AI mechanically. Replacing TTR with MATTR (window 20) flips the sign: $d=-0.31$ over all documents, and $d=-0.94$ within the window-20-satisfying subset (which over-represents long AI documents, so the subset value is subset-specific). AI sentence endings are less diverse, not more. We report this reversal as a caution for stylometric work: length-uncontrolled diversity metrics can invert conclusions.
+
+\subsection{H1: Lexical Features Dominate Discrimination}
+\label{sec:h1results}
+
+Table~\ref{tab:auc} reports human/AI classification AUCs. Lexical features reach AUC 0.998; the 13 rhythm metrics alone reach 0.897. The paired difference is $-0.101$ (95\% CI $[-0.105, -0.097]$); the lexical classifier wins in 100 of 100 folds. H1 is supported---discriminative power differs by feature family---but in the direction \emph{opposite} to the practitioner claim: vocabulary, not rhythm, carries most of the human/AI signal in this corpus.
+
+\begin{table}[H]
+\centering
+\caption{Human/AI discrimination AUC (mean $\pm$ SD over 100 folds; brackets: bootstrap 95\% CI, $B=10{,}000$). \texttt{main}: all 1{,}046 documents. \texttt{lenadj}: all features residualized against document-length covariates. \texttt{sens\_degen}: 6 degenerate Llama documents removed. \texttt{sens\_nollama}: all 50 Llama documents removed.}
+\label{tab:auc}
+\small
+\begin{tabular}{lccc}
+\toprule
+Condition & Lexical & Rhythm & Combined \\
+\midrule
+main & $0.998 \pm 0.003$ [0.997, 0.998] & $0.897 \pm 0.020$ [0.893, 0.901] & $0.998 \pm 0.003$ [0.998, 0.999] \\
+lenadj & $0.974 \pm 0.011$ [0.972, 0.976] & $0.810 \pm 0.031$ [0.804, 0.816] & $0.980 \pm 0.009$ [0.978, 0.981] \\
+sens\_degen & $0.998 \pm 0.003$ [0.997, 0.998] & $0.913 \pm 0.020$ [0.909, 0.917] & $0.998 \pm 0.003$ [0.998, 0.999] \\
+sens\_nollama & $0.999 \pm 0.003$ [0.998, 0.999] & $0.921 \pm 0.018$ [0.918, 0.924] & $0.999 \pm 0.002$ [0.998, 0.999] \\
+\midrule
+\multicolumn{4}{l}{\texttt{lenadj} reference, length covariates only: $0.811 \pm 0.024$ [0.806, 0.815]} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Paired AUC differences (same folds), with bootstrap 95\% CIs and the fraction of the 100 folds in which the difference is positive.}
+\label{tab:aucdiff}
+\small
+\begin{tabular}{llrr}
+\toprule
+Condition & Comparison & Difference [95\% CI] & Folds $>0$ \\
+\midrule
+main & rhythm $-$ lexical & $\mathbf{-0.101}$ [$-0.105, -0.097$] & 0/100 \\
+main & combined $-$ lexical & $+0.0003$ [$+0.0002, +0.0004$] & 67/100 \\
+main & combined $-$ rhythm & $+0.101$ [$+0.097, +0.105$] & 100/100 \\
+lenadj & rhythm $-$ lexical & $-0.164$ [$-0.170, -0.157$] & 0/100 \\
+lenadj & combined $-$ lexical & $+0.006$ [$+0.005, +0.007$] & 89/100 \\
+lenadj & lexical $-$ length\_only & $+0.163$ [$+0.159, +0.168$] & 100/100 \\
+lenadj & rhythm $-$ length\_only & $-0.000$ [$-0.008, +0.008$] & 46/100 \\
+sens\_degen & rhythm $-$ lexical & $-0.085$ [$-0.088, -0.081$] & 0/100 \\
+sens\_nollama & rhythm $-$ lexical & $-0.078$ [$-0.081, -0.074$] & 0/100 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Four readings of Tables~\ref{tab:auc} and \ref{tab:aucdiff}:
+
+\begin{enumerate}
+    \item \textbf{The lexical advantage is robust.} It survives length residualization ($-0.164$), degenerate-document removal ($-0.085$), and full Llama exclusion ($-0.078$); no CI approaches zero.
+    \item \textbf{Rhythm alone is still practically useful.} Thirteen interpretable numbers reach AUC 0.897 (0.913--0.921 after outlier handling)---close to nine-tenths discrimination with features a human can read.
+    \item \textbf{Length explains part, not all, of the rhythm signal.} Document length alone discriminates at AUC 0.811 (AI documents are shorter). After residualization, rhythm remains at 0.810: the residualized rhythm signal is (linearly) orthogonal to length, so rhythm carries length-independent information, but its headline AUC should not be read as length-free. Lexical features are nearly untouched by residualization (0.974).
+    \item \textbf{Rhythm is non-redundant on top of lexicon.} In \texttt{main} the combined gain is $+0.0003$---real but immaterial, since lexical AUC sits at a 0.998 ceiling. Under length adjustment the gain is $+0.006$ [$+0.005, +0.007$], positive in 89/100 folds: rhythm contributes information the vocabulary does not contain.
+\end{enumerate}
+
+\subsection{H2: A Two-Layer Fingerprint}
+\label{sec:h2results}
+
+\paragraph{Single-feature level: rhythm degrees differ across models.}
+All 13 rhythm metrics differentiate the 7 models (permutation $p<0.005$ for every metric), with between/within ratios from 0.32 to 1.23 (Table~\ref{tab:ratios}). Single significant words are, on average, \emph{less} model-differentiating: median ratio 0.27 (IQR 0.20--0.37), median permutation $z=2.1$, with only 55.2\% of the 797 words reaching permutation $p<0.05$. The lexical-vs-rhythm contrast is significant and large in the direction opposite to naive expectation (Mann--Whitney $p=2.0\times10^{-7}$, rank-biserial $r=-0.84$ on ratios; $p=5.0\times10^{-7}$, $r=-0.81$ on permutation $z$), and is stable under the core-11 rhythm subset, restriction to words in $\geq 10$ AI documents, and Llama exclusion ($r=-0.73$ to $-0.86$). Part of this is structural: binary occurrence indicators carry Bernoulli within-model variance that depresses per-word ratios.
+
+\begin{table}[H]
+\centering
+\caption{Between/within model dispersion of rhythm metrics across the 7 LLMs (AI documents only). All permutation $p<0.005$ ($n=1{,}000$, $+1$-corrected). The two sentence-ending rhetoric metrics (bottom) separate cleanly from the core rhythm metrics.}
+\label{tab:ratios}
+\small
+\begin{tabular}{lrr}
+\toprule
+Metric & Ratio & Perm.\ $z$ \\
+\midrule
+ではなく per sentence & 0.32 & 4.3 \\
+Sentence-length CV (chars) & 0.44 & 5.2 \\
+Sentence-length CV (moras) & 0.47 & 6.0 \\
+Burstiness (chars) & 0.52 & 9.4 \\
+Sentence-length mean (chars) & 0.53 & 8.3 \\
+Sentence-length SD (chars) & 0.57 & 4.9 \\
+Paragraph sent.-count CV & 0.58 & 10.6 \\
+Burstiness (moras) & 0.58 & 10.6 \\
+Commas per sentence & 0.62 & 7.7 \\
+Sentence-length SD (moras) & 0.64 & 5.6 \\
+Sentence-length mean (moras) & 0.65 & 10.4 \\
+\midrule
+\textbf{Noun-ending rate (prose)} & \textbf{0.85} & \textbf{16.9} \\
+\textbf{Ending-bigram MATTR} & \textbf{1.23} & \textbf{26.7} \\
+\midrule
+\multicolumn{3}{l}{Lexical (797 FDR words): median ratio 0.27 (IQR 0.20--0.37), median $z=2.1$}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Multivariate level: the lexical profile names the model.}
+The picture reverses when features act together. A multinomial classifier over lexical document-occurrence features identifies which of the 7 models produced a document with $92.1\% \pm 3.8\%$ accuracy (macro-F1 0.920; chance 14.3\%); the 13 rhythm metrics manage $50.9\% \pm 6.5\%$ (macro-F1 0.495). Excluding Llama (6-way, chance 16.7\%): lexical 90.8\%, rhythm 50.2\%. Individually weak word indicators are collectively a near-unique model signature; rhythm metrics, individually well-separated in degree, do not accumulate into one.
+
+\paragraph{Model-specific vocabulary is concrete and interpretable.} The most model-differentiating words are ordinary vocabulary choices, not exotica: 纏め (\textit{matome}, ``summary''; ratio 1.59) appears in essentially every Claude Opus 4 and GPT-OSS document but 2\% of Llama documents (GPT-3.5: 34\%); 於く (\textit{oku}, formal ``in/at''; 1.25) ranges from 2\% (GPT-OSS) to 98\% (Sonnet 4); 用いる (\textit{mochiiru}, ``to employ''; 1.24) is nearly GPT-4o-exclusive (42\% vs.\ 0--6\% elsewhere).
+
+\paragraph{Sentence-ending rhetoric behaves like vocabulary.} Within the rhythm family, the two sentence-ending metrics are outliers: noun-ending rate (ratio 0.85) and ending-bigram MATTR (1.23) top the dispersion table, well separated from the core rhythm band (0.32--0.65). Claude 3 Haiku, GPT-3.5, and GPT-4o use noun endings almost never (0.3--1.3\%), while Claude Sonnet 4, Opus 4, and GPT-OSS 20B use them at or above the human rate (13--22\% vs.\ human 13.7\%). With only two such metrics we treat this as a descriptive observation, not a tested contrast---but it suggests sentence-final rhetoric belongs to the model-specific layer.
+
+\paragraph{H2 verdict.} The hypothesis splits by level of operationalization. At the single-feature level it fails: every rhythm metric differs across models in \emph{degree} (all permutation $p<0.005$). At the multivariate level it holds: lexical profiles identify the model (92\%), rhythm profiles largely do not (51\%). The defensible summary is that the rhythm shift is \emph{directionally} homogeneous---all 7 models are more monotone than humans on the core metrics---while its magnitude is model-dependent; the lexical profile is the model-specific fingerprint.
+
+\section{Discussion}
+
+\subsection{A Two-Layer Fingerprint Structure}
+
+The results organize into two layers. \textbf{Layer 1 (shared machine accent)}: rhythmic monotonization---suppressed burstiness, uniform paragraph structure, compressed sentence-length variation---points the same way in all 7 models and supports human/AI discrimination at AUC $\approx 0.90$ with 13 interpretable features. \textbf{Layer 2 (model signature)}: the lexical profile, which identifies the generating model at 92\% accuracy, plus sentence-ending rhetoric, which disperses across models more than any core rhythm metric. Human/AI discrimination is best served by vocabulary (AUC 0.998), which aggregates both layers; model attribution is served almost solely by layer 2. Compactly: \emph{what} is written tells you which model; \emph{how} it is written tells you a machine wrote it.
+
+This structure connects to the homogenization literature: \citet{munozortiz2024contrasting} observed for English that inter-LLM differences are smaller than the human--LLM gap on dispersion measures, and our layer-1 finding replicates that shape in Japanese at effect sizes up to $d=-0.96$. That the shared layer is rhythmic and the differentiating layer is lexical is also consistent with alignment-tuning accounts~\citep{juzek2025overuse, rlhf2025detectability, padmakumar2024diversity}: pressure toward well-organized, uniformly readable output plausibly acts on all tuned models alike, while each model's lexical preferences remain idiosyncratic to its training mix and feedback data.
+
+\subsection{The Practitioner Claim, Tested}
+
+The \texttt{natural-japanese} lint~\citep{mizoguchi2026natural} deserves credit for the sharpest form of the rhythm intuition, and our data vindicate its descriptive core: the largest human--AI rhythm gaps are exactly the quantities it lints (burstiness, paragraph-structure CV), the direction is universal across models, and the mora-level replication shows the effect is phonological, not orthographic. Where the data part ways with the claim is the comparative statement. On this corpus, vocabulary out-discriminates rhythm by a wide, stable margin ($\Delta$AUC $\approx 0.10$, never reversed in 100 folds, robust to length control and model exclusions). ``AI smell lives in rhythm rather than vocabulary'' should be revised to: rhythm is where AI text \emph{feels} uniform across models, but vocabulary is where it is most \emph{detectable}. The practical case for rhythm features is different and still strong---they are few, cheap, human-readable, and directionally universal, which suits lint-style feedback tools precisely because writers can act on ``vary your sentence lengths'' but not on ``use 向上 less across 800 words.''
+
+\subsection{Correcting Our Own Baseline}
+
+This study's lexical layer began as an audit of our prior work, and the audit found a real defect: token-level $\chi^2$ tests treat within-document repetition as independent evidence, and 35\% of the 651 words we previously reported---about half of the AI-excess side---do not survive document-based re-analysis. We prefer stating this plainly over defending the earlier number: the corrected list (237 excess words surviving; 797 significant words in the full re-analysis) is smaller and better-founded, and the failure cases (``Hash'': 402 tokens, 2 documents) illustrate why document occurrence is the right unit for excess-vocabulary claims in any language. The correction also sharpens the cross-linguistic result: the $r$/$\delta$ complementarity of \citet{kobak2025excess}---ratio for rare AI-particular words, gap for high-frequency register words---emerges in Japanese only once the statistics are computed at the document level.
+
+\section{Limitations}
+\label{sec:limitations}
+
+\paragraph{Register and topic confound.} The human corpus consists of real, freely composed Qiita/Zenn articles; the AI corpus was generated from fixed prompts on 10 themes. Topic mix, prompt framing, and register therefore differ between classes, and the lexical AUC of 0.998 is a within-corpus separation, not an estimate of operational AI-detector performance. The words driving separation are ordinary (思う: 75\% of human vs.\ 6\% of AI documents; 向上: 21\% vs.\ 63\%), and we verified that no single artifact token fully separates the classes, but prompt style and topic contributions cannot be excised. All H1 claims are scoped to this same-theme-family corpus contrast.
+
+\paragraph{Approximate fold CIs.} Cross-validation folds share training data, so bootstrap CIs over fold AUCs are anti-conservative approximations. Repeat-level aggregates are provided in the released results; the headline contrast (0/100 folds reversed, present in all four conditions) does not depend on the CI construction.
+
+\paragraph{Mora approximation.} Mora counts derive from UniDic pronunciation fields; tokens without readings (ASCII identifiers, code fragments) contribute zero moras, deflating mora-based lengths for English-heavy documents. Character-based metrics are reported alongside throughout, and the burstiness findings agree across the two bases.
+
+\paragraph{Tokenization artifacts.} Several high-$r$ items are ASCII fragments (NF, Found, Internal, Foreign) produced by MeCab segmentation of embedded English spans, a limitation inherited from the shared tokenizer of both corpora; we flag them in Table~\ref{tab:topwords} rather than silently exclude them.
+
+\paragraph{Inherited corpus constraints.} The source corpus was generated at default temperature without fixed seeds, so corpus-level regeneration is not bit-reproducible (all analyses on the fixed corpus are seeded and deterministic). MATTR windows shrink for short documents (247 of 1{,}046, disproportionately AI), so window widths are not uniform; both the all-document and window-satisfying estimates are reported. The H2 lexical set was selected on a human/AI criterion, which is not leakage for the model-dispersion question but is not guaranteed orthogonal to it; restriction to broadly attested words leaves the conclusion unchanged. The combined classifier concatenates binary and z-scored features under a single L2 penalty without per-block tuning, and length residualization is linear, leaving possible nonlinear length effects. The sentence-ending rhetoric group contains only two metrics and is reported descriptively.
+
+\paragraph{Scope.} One language (Japanese), one domain (technical blogging), seven models. Our prior work found excess vocabulary to be strongly domain-dependent~\citep{imoto2026excess}, so the lexical/rhythm balance may differ in other genres; the two-layer structure is the hypothesis we would test there.
+
+\section{Conclusion}
+
+We compared lexical and rhythmic fingerprints of Japanese LLM-generated text across 7 models under a controlled design, after rebuilding the lexical statistics on a document-occurrence basis. Three results stand. First, the document-based re-analysis corrects our prior study: 35\% of its 651 reported excess words---half of the AI-excess side---were artifacts of token-level pseudoreplication, and the corrected Japanese excess vocabulary reproduces the $r$/$\delta$ complementarity established for English. Second, rhythmic monotonization is a genuine, model-universal property of Japanese AI text (burstiness $d=-0.96$; direction shared by all 7 models), yet lexical features dominate human/AI discrimination (AUC 0.998 vs.\ 0.897; gap robust to length control and outlier exclusion)---the opposite of the practitioner claim that motivated the comparison, whose descriptive core our rhythm measurements nevertheless confirm. Third, the two families form a two-layer fingerprint: rhythm shifts in a shared direction with model-dependent magnitude, while the lexical profile (and, descriptively, sentence-ending rhetoric) identifies the generating model at 92\% accuracy. Vocabulary tells you which model wrote a text; rhythm tells you that a model wrote it.
+
+\paragraph{Data Availability.}
+All analysis code, per-word statistics (1{,}684 words), rhythm measurements (1{,}046 documents), and classification results are available at \url{https://github.com/kenimo49/llm-text-fingerprints-ja} under the MIT License.
+% TODO: Zenodo concept DOI to be inserted after deposit (placeholder: 10.5281/zenodo.XXXXXXX)
+The underlying corpora are those of \citet{imoto2026excess} (\url{https://github.com/kenimo49/excess-vocabulary-ja}), used read-only at commit \texttt{fdb24f4c}.
+
+\bibliography{references}
+
+\end{CJK}
+\end{document}

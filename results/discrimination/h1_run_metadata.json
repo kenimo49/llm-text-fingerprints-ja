@@ -1,0 +1,14 @@
+{
+  "seed": 20260717,
+  "n_splits": 5,
+  "n_repeats": 20,
+  "min_doc_count": 5,
+  "fdr_alpha": 0.05,
+  "bootstrap_B": 10000,
+  "python": "3.10.12",
+  "numpy": "2.2.6",
+  "sklearn": "1.7.2",
+  "scipy": "1.15.3",
+  "pandas": "2.3.3",
+  "elapsed_sec": 992.3
+}

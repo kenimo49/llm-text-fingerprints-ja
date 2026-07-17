@@ -1,0 +1,35 @@
+excess_stats: document-occurrence excess vocabulary pipeline
+  corpora: AI=350 docs, human=700 docs
+  old method: 1684 tested, 651 Bonferroni-significant
+  chi2 (document 2x2) ...
+    400/1684
+    800/1684
+    1200/1684
+    1600/1684
+  bootstrap CI (B=1000, seed=20260717) ...
+  bootstrap 100/1000
+  bootstrap 200/1000
+  bootstrap 300/1000
+  bootstrap 400/1000
+  bootstrap 500/1000
+  bootstrap 600/1000
+  bootstrap 700/1000
+  bootstrap 800/1000
+  bootstrap 900/1000
+  bootstrap 1000/1000
+  saved /home/iris/repos/iris-lab/experiments/028-lexical-vs-rhythm-fingerprint/phase15-stats/results/word_stats.csv
+{
+  "old_651": 651,
+  "old_651_excess": 458,
+  "old_651_deficit": 193,
+  "survive_fdr": 424,
+  "survive_fdr_excess": 237,
+  "survive_fdr_deficit": 187,
+  "survive_bonferroni": 259,
+  "survive_ci": 458,
+  "survive_all3": 259,
+  "new_sig_fdr_total_1684": 797,
+  "new_sig_bonf_total_1684": 381,
+  "newly_sig_not_in_651": 300
+}
+OK — write summary.md separately from these results

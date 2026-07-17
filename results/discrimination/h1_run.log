@@ -1,0 +1,74 @@
+=== condition main: 1046 docs (AI 350) adjust=False ===
+[main] fold 10/100 lex=1.000 rhy=0.891 com=1.000 words=1538
+[main] fold 20/100 lex=0.993 rhy=0.926 com=0.993 words=1498
+[main] fold 30/100 lex=0.999 rhy=0.901 com=1.000 words=1562
+[main] fold 40/100 lex=1.000 rhy=0.875 com=0.999 words=1555
+[main] fold 50/100 lex=0.999 rhy=0.902 com=1.000 words=1553
+[main] fold 60/100 lex=1.000 rhy=0.875 com=1.000 words=1576
+[main] fold 70/100 lex=1.000 rhy=0.889 com=1.000 words=1536
+[main] fold 80/100 lex=0.999 rhy=0.869 com=1.000 words=1512
+[main] fold 90/100 lex=0.999 rhy=0.930 com=1.000 words=1523
+[main] fold 100/100 lex=1.000 rhy=0.884 com=1.000 words=1619
+=== condition lenadj: 1046 docs (AI 350) adjust=True ===
+[lenadj] fold 10/100 lex=0.951 rhy=0.797 com=0.973 words=1538
+[lenadj] fold 20/100 lex=0.968 rhy=0.862 com=0.979 words=1498
+[lenadj] fold 30/100 lex=0.982 rhy=0.778 com=0.981 words=1562
+[lenadj] fold 40/100 lex=0.973 rhy=0.777 com=0.968 words=1555
+[lenadj] fold 50/100 lex=0.980 rhy=0.822 com=0.983 words=1553
+[lenadj] fold 60/100 lex=0.970 rhy=0.782 com=0.976 words=1576
+[lenadj] fold 70/100 lex=0.976 rhy=0.801 com=0.989 words=1536
+[lenadj] fold 80/100 lex=0.967 rhy=0.781 com=0.977 words=1512
+[lenadj] fold 90/100 lex=0.989 rhy=0.843 com=0.992 words=1523
+[lenadj] fold 100/100 lex=0.988 rhy=0.769 com=0.985 words=1619
+=== condition sens_degen: 1040 docs (AI 344) adjust=False ===
+[sens_degen] fold 10/100 lex=0.997 rhy=0.913 com=1.000 words=1499
+[sens_degen] fold 20/100 lex=0.993 rhy=0.921 com=0.992 words=1554
+[sens_degen] fold 30/100 lex=1.000 rhy=0.911 com=1.000 words=1557
+[sens_degen] fold 40/100 lex=1.000 rhy=0.920 com=1.000 words=1498
+[sens_degen] fold 50/100 lex=0.998 rhy=0.916 com=0.999 words=1500
+[sens_degen] fold 60/100 lex=0.991 rhy=0.953 com=0.992 words=1527
+[sens_degen] fold 70/100 lex=1.000 rhy=0.943 com=1.000 words=1573
+[sens_degen] fold 80/100 lex=0.998 rhy=0.915 com=0.999 words=1542
+[sens_degen] fold 90/100 lex=0.998 rhy=0.902 com=0.999 words=1538
+[sens_degen] fold 100/100 lex=0.999 rhy=0.913 com=1.000 words=1527
+=== condition sens_nollama: 996 docs (AI 300) adjust=False ===
+[sens_nollama] fold 10/100 lex=1.000 rhy=0.907 com=1.000 words=1333
+[sens_nollama] fold 20/100 lex=1.000 rhy=0.907 com=1.000 words=1308
+[sens_nollama] fold 30/100 lex=0.999 rhy=0.940 com=1.000 words=1330
+[sens_nollama] fold 40/100 lex=1.000 rhy=0.914 com=1.000 words=1292
+[sens_nollama] fold 50/100 lex=1.000 rhy=0.892 com=1.000 words=1294
+[sens_nollama] fold 60/100 lex=1.000 rhy=0.913 com=1.000 words=1262
+[sens_nollama] fold 70/100 lex=1.000 rhy=0.877 com=1.000 words=1299
+[sens_nollama] fold 80/100 lex=1.000 rhy=0.942 com=1.000 words=1259
+[sens_nollama] fold 90/100 lex=1.000 rhy=0.920 com=1.000 words=1329
+[sens_nollama] fold 100/100 lex=0.999 rhy=0.902 com=1.000 words=1344
+   condition    features  auc_mean   auc_sd    ci_lo    ci_hi  repeat_mean  repeat_sd  n_folds
+        main    combined  0.998245 0.002951 0.997645 0.998808     0.998245   0.000167      100
+        main     lexical  0.997925 0.003046 0.997312 0.998485     0.997925   0.000171      100
+        main      rhythm  0.897245 0.019553 0.893363 0.900996     0.897245   0.002136      100
+      lenadj    combined  0.979613 0.008717 0.977854 0.981223     0.979613   0.001500      100
+      lenadj length_only  0.810671 0.024141 0.805940 0.815293     0.810671   0.000962      100
+      lenadj     lexical  0.973956 0.010542 0.971845 0.975956     0.973956   0.002023      100
+      lenadj      rhythm  0.810299 0.030693 0.804346 0.816309     0.810299   0.003001      100
+  sens_degen    combined  0.998234 0.002806 0.997674 0.998755     0.998234   0.000136      100
+  sens_degen     lexical  0.997936 0.002774 0.997369 0.998461     0.997936   0.000186      100
+  sens_degen      rhythm  0.913463 0.019855 0.909494 0.917230     0.913463   0.001727      100
+sens_nollama    combined  0.998763 0.002402 0.998285 0.999210     0.998763   0.000146      100
+sens_nollama     lexical  0.998576 0.002573 0.998059 0.999064     0.998576   0.000102      100
+sens_nollama      rhythm  0.920956 0.017622 0.917545 0.924316     0.920956   0.001341      100
+   condition          comparison  diff_mean  diff_sd     ci_lo     ci_hi  frac_folds_positive
+        main      rhythm-lexical  -0.100681 0.019766 -0.104521 -0.096801                 0.00
+        main    combined-lexical   0.000319 0.000555  0.000215  0.000430                 0.67
+        main     combined-rhythm   0.101000 0.019627  0.097094  0.104862                 1.00
+      lenadj      rhythm-lexical  -0.163657 0.033292 -0.170231 -0.157066                 0.00
+      lenadj    combined-lexical   0.005657 0.004997  0.004681  0.006625                 0.89
+      lenadj     combined-rhythm   0.169314 0.030475  0.163283  0.175120                 1.00
+      lenadj lexical-length_only   0.163285 0.024961  0.158546  0.168317                 1.00
+      lenadj  rhythm-length_only  -0.000372 0.042132 -0.008397  0.007759                 0.46
+  sens_degen      rhythm-lexical  -0.084473 0.020222 -0.088432 -0.080559                 0.00
+  sens_degen    combined-lexical   0.000298 0.000563  0.000189  0.000410                 0.58
+  sens_degen     combined-rhythm   0.084771 0.020190  0.080824  0.088866                 1.00
+sens_nollama      rhythm-lexical  -0.077621 0.018053 -0.081179 -0.074135                 0.00
+sens_nollama    combined-lexical   0.000187 0.000335  0.000125  0.000255                 0.43
+sens_nollama     combined-rhythm   0.077808 0.017966  0.074344  0.081289                 1.00
+elapsed: 992.3s

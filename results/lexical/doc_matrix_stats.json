@@ -1,0 +1,12 @@
+{
+  "ai": {
+    "docs": 350,
+    "skipped": 0,
+    "tokens": 121243
+  },
+  "human": {
+    "docs": 700,
+    "skipped": 0,
+    "tokens": 573279
+  }
+}

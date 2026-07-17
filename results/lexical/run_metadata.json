@@ -1,0 +1,20 @@
+{
+  "generated_at": "2026-07-17T16:28:09.404861+09:00",
+  "seed": 20260717,
+  "n_bootstrap": 1000,
+  "alpha": 0.05,
+  "python": "3.10.12",
+  "numpy": "2.2.6",
+  "scipy": "1.15.3",
+  "mecab_dict": "unidic-lite",
+  "corpus": {
+    "ai_docs": 350,
+    "human_docs": 700
+  },
+  "source_repo_head": "fdb24f4c970d0af29315fa6f31c3f67f000322bb",
+  "old_stats_file": "/home/iris/repos/excess-vocabulary-ja/results/statistical_tests.json",
+  "smoothing": "Laplace p=(a+1)/(b+1) per Kobak arXiv:2406.07016 Methods 4.1",
+  "frequency_unit": "document occurrence (binary per doc)",
+  "multiple_comparison": "BH-FDR primary, Bonferroni secondary",
+  "ci_method": "percentile bootstrap over documents, both corpora resampled"
+}
